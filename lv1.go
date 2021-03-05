@@ -10,7 +10,8 @@ var wg sync.WaitGroup
 const count = 50000
 
 func main() {
-	runtime.GOMAXPROCS(8)//多操作线程处理
+	num := runtime.NumCPU()//返回本地机器的逻辑cpu个数
+	runtime.GOMAXPROCS(num)//多操作线程处理
 	doneCh := make(chan struct{})
 	for i := 1; i <= count; i++ {
 		wg.Add(1)
