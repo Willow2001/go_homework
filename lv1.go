@@ -1,59 +1,41 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+	"runtime"
+	"sync"
+)
+var wg sync.WaitGroup
+const count = 50000
 
-//人类
-type person struct {
-	name string // 姓名
-	age int // 年龄
-	gender string // 性别
-}
-//鸽子
-type dove interface {
-	gu() // 鸽
-}
-func (p *person) gu() {
-	fmt.Println(p.name, "又鸽了")
-}
-//复读机
-type repeater interface {
-	repeat(string) // 复读
-}
-func (p *person) repeat(word string) {
-	fmt.Println(word)
-}
-//柠檬精
-type lemoner interface {
-	sour() // 酸
-}
-func (p *person) sour() {
-	fmt.Println("我好酸啊呜呜呜")
-}
-//真香怪
-type regreter interface {
-	regret(int) // 真香
-}
-func (p *person) regret(i int) {
-	if i>=1{
-		fmt.Println("真香！")
-	}else{
-		fmt.Println("啥呀，垃圾东西")
-		i++
-		p.regret(i)
-	}
-}
 func main() {
-	p := &person{
-		name: "student",
-		age: 18,
-		gender: "female",
+	runtime.GOMAXPROCS(8)//多操作线程处理
+	doneCh := make(chan struct{})
+	for i := 1; i <= count; i++ {
+		wg.Add(1)
+		go func(x int) {
+			defer wg.Done()
+			find(x)
+		}(i)
 	}
-	var sentence string
-	i:=0
-	p.gu()
-	p.sour()
-	p.regret(i)
-	fmt.Println("整句话来复读吧：")
-	fmt.Scan(&sentence)
-	p.repeat(sentence)
+	close(doneCh)
+	wg.Wait()
+	fmt.Println("main goroutine finish")
 }
+func find(x int){
+	var m,judge int
+	judge = 0
+	sqrtNum := math.Sqrt(float64(x))//利用平方根提高搜索效率
+	for i := 2; i <= int(sqrtNum); i++ {
+		m = x % i
+		if m==0{
+			judge++
+		}
+	}
+	if judge==0 && x!=1{
+		fmt.Println(x)//打印素数
+	}
+}
+
+
